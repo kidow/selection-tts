@@ -46,6 +46,13 @@ const PREFERRED_VOICE_NAMES_BY_LANGUAGE = {
     "Milena",
     "Microsoft Svetlana Online (Natural) - Russian (Russia)",
   ],
+  pt: [
+    "Google português do Brasil",
+    "Google português",
+    "Joana",
+    "Luciana",
+    "Microsoft Fernanda Online (Natural) - Portuguese (Brazil)",
+  ],
 };
 
 function pickVoice(voices, language) {
@@ -446,7 +453,7 @@ function looksLikeRussianText(text) {
 }
 
 function pickTargetLanguage(text, detectedLanguages) {
-  const supportedOrder = ["en", "ja", "zh", "fr", "de", "es", "ar", "ru"];
+  const supportedOrder = ["en", "ja", "zh", "fr", "de", "es", "ar", "ru", "pt"];
   const mappedLanguageCodes = {
     en: "en-US",
     ja: "ja-JP",
@@ -456,6 +463,7 @@ function pickTargetLanguage(text, detectedLanguages) {
     es: "es-ES",
     ar: "ar-SA",
     ru: "ru-RU",
+    pt: "pt-PT",
   };
 
   const normalizedCandidates = (detectedLanguages || [])
