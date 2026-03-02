@@ -24,6 +24,12 @@ const PREFERRED_VOICE_NAMES_BY_LANGUAGE = {
     "Amelie",
     "Microsoft Denise Online (Natural) - French (France)",
   ],
+  de: [
+    "Google Deutsch",
+    "Anna",
+    "Markus",
+    "Microsoft Katja Online (Natural) - German (Germany)",
+  ],
 };
 
 function pickVoice(voices, language) {
@@ -172,13 +178,71 @@ function looksLikeFrenchText(text) {
   return score >= 2;
 }
 
+function looksLikeGermanText(text) {
+  const normalized = text
+    .toLowerCase()
+    .replace(/ß/g, "ss")
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/[^a-z'\s]/g, " ");
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  if (!tokens.length) {
+    return false;
+  }
+
+  if (
+    /\bguten\s+tag\b/.test(normalized) ||
+    /\bdanke\s+(schoen|sehr)\b/.test(normalized) ||
+    /\bauf\s+wiedersehen\b/.test(normalized)
+  ) {
+    return true;
+  }
+
+  const germanWords = new Set([
+    "guten",
+    "danke",
+    "schoen",
+    "wiedersehen",
+    "wie",
+    "geht",
+    "ihnen",
+    "ich",
+    "heisse",
+    "bitte",
+    "nicht",
+    "und",
+    "ist",
+    "sind",
+    "der",
+    "die",
+    "das",
+    "mit",
+    "fuer",
+  ]);
+
+  let score = 0;
+  for (const token of tokens) {
+    if (germanWords.has(token)) {
+      score += 1;
+    }
+  }
+
+  if (tokens.length <= 2) {
+    return score >= 1;
+  }
+
+  return score >= 2;
+}
+
 function pickTargetLanguage(text, detectedLanguages) {
-  const supportedOrder = ["en", "ja", "zh", "fr"];
+  const supportedOrder = ["en", "ja", "zh", "fr", "de"];
   const mappedLanguageCodes = {
     en: "en-US",
     ja: "ja-JP",
     zh: "zh-CN",
     fr: "fr-FR",
+    de: "de-DE",
   };
 
   const normalizedCandidates = (detectedLanguages || [])
@@ -192,6 +256,11 @@ function pickTargetLanguage(text, detectedLanguages) {
     item.language.startsWith("fr")
   );
   const isLikelyFrench = looksLikeFrenchText(text);
+  const germanCandidate = normalizedCandidates.find((item) =>
+    item.language.startsWith("de")
+  );
+  const isLikelyGerman = looksLikeGermanText(text);
+
   if (
     frenchCandidate &&
     (frenchCandidate.percentage >= 5 || isLikelyFrench)
@@ -201,6 +270,17 @@ function pickTargetLanguage(text, detectedLanguages) {
 
   if (isLikelyFrench && !frenchCandidate) {
     return mappedLanguageCodes.fr;
+  }
+
+  if (
+    germanCandidate &&
+    (germanCandidate.percentage >= 5 || isLikelyGerman)
+  ) {
+    return mappedLanguageCodes.de;
+  }
+
+  if (isLikelyGerman && !germanCandidate) {
+    return mappedLanguageCodes.de;
   }
 
   for (const candidate of normalizedCandidates) {
@@ -213,6 +293,10 @@ function pickTargetLanguage(text, detectedLanguages) {
 
   if (isLikelyFrench) {
     return mappedLanguageCodes.fr;
+  }
+
+  if (isLikelyGerman) {
+    return mappedLanguageCodes.de;
   }
 
   return null;
