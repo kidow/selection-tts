@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Selection TTS",
   "version": "0.1.0",
-  "description": "Speak selected English text via keyboard shortcut.",
+  "description": "Speak selected English or Japanese text via keyboard shortcut.",
   "permissions": ["activeTab"],
   "host_permissions": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
   "icons": {
@@ -27,7 +27,7 @@
         "default": "Ctrl+I",
         "mac": "Command+I"
       },
-      "description": "Detect selected text language and speak only if English"
+      "description": "Detect selected text language and speak if it is English or Japanese"
     }
   },
   "content_scripts": [

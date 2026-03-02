@@ -1,28 +1,51 @@
-const PREFERRED_VOICE_NAMES = [
-  "Google US English",
-  "Samantha",
-  "Alex",
-  "Microsoft Jenny Online (Natural) - English (United States)",
-];
+const PREFERRED_VOICE_NAMES_BY_LANGUAGE = {
+  en: [
+    "Google US English",
+    "Samantha",
+    "Alex",
+    "Microsoft Jenny Online (Natural) - English (United States)",
+  ],
+  ja: [
+    "Google 日本語",
+    "Kyoko",
+    "Otoya",
+    "Microsoft Nanami Online (Natural) - Japanese (Japan)",
+  ],
+};
 
-function pickVoice(voices) {
+function pickVoice(voices, language) {
   if (!voices.length) {
     return null;
   }
 
-  for (const preferredName of PREFERRED_VOICE_NAMES) {
+  const normalizedLanguage = (language || "en").toLowerCase();
+  const baseLanguage = normalizedLanguage.split("-")[0];
+  const preferredNames =
+    PREFERRED_VOICE_NAMES_BY_LANGUAGE[baseLanguage] ||
+    PREFERRED_VOICE_NAMES_BY_LANGUAGE.en;
+
+  for (const preferredName of preferredNames) {
     const matched = voices.find((voice) => voice.name === preferredName);
     if (matched) {
       return matched;
     }
   }
 
-  const enUsVoice = voices.find((voice) => voice.lang === "en-US");
-  if (enUsVoice) {
-    return enUsVoice;
+  const exactLanguageVoice = voices.find(
+    (voice) => voice.lang.toLowerCase() === normalizedLanguage
+  );
+  if (exactLanguageVoice) {
+    return exactLanguageVoice;
   }
 
-  return voices.find((voice) => voice.lang.startsWith("en")) || null;
+  const baseLanguageVoice = voices.find((voice) =>
+    voice.lang.toLowerCase().startsWith(baseLanguage)
+  );
+  if (baseLanguageVoice) {
+    return baseLanguageVoice;
+  }
+
+  return voices.find((voice) => voice.lang.toLowerCase().startsWith("en")) || null;
 }
 
 function loadVoices() {
@@ -48,7 +71,7 @@ function loadVoices() {
   });
 }
 
-async function speak(text) {
+async function speak(text, language = "en-US") {
   if (!text?.trim()) {
     return;
   }
@@ -56,10 +79,10 @@ async function speak(text) {
   window.speechSynthesis.cancel();
 
   const voices = await loadVoices();
-  const selectedVoice = pickVoice(voices);
+  const selectedVoice = pickVoice(voices, language);
 
   const utterance = new SpeechSynthesisUtterance(text.trim());
-  utterance.lang = selectedVoice?.lang || "en-US";
+  utterance.lang = selectedVoice?.lang || language;
   utterance.voice = selectedVoice;
   utterance.rate = 1.0;
   utterance.pitch = 1.0;
@@ -86,18 +109,26 @@ function detectLanguage(text) {
   });
 }
 
-async function speakCurrentSelectionIfEnglish() {
+async function speakCurrentSelectionIfSupportedLanguage() {
   const selectedText = window.getSelection()?.toString()?.trim();
   if (!selectedText) {
     return;
   }
 
   const language = await detectLanguage(selectedText);
-  if (!language || !language.startsWith("en")) {
+  if (!language) {
     return;
   }
 
-  await speak(selectedText);
+  const normalizedLanguage = language.toLowerCase();
+  if (
+    !normalizedLanguage.startsWith("en") &&
+    !normalizedLanguage.startsWith("ja")
+  ) {
+    return;
+  }
+
+  await speak(selectedText, normalizedLanguage.startsWith("ja") ? "ja-JP" : "en-US");
 }
 
 function isEditableTarget(target) {
@@ -126,12 +157,12 @@ function onShortcutKeydown(event) {
   }
 
   event.preventDefault();
-  void speakCurrentSelectionIfEnglish();
+  void speakCurrentSelectionIfSupportedLanguage();
 }
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message?.type === "SPEAK_CURRENT_SELECTION_IF_ENGLISH") {
-    void speakCurrentSelectionIfEnglish();
+    void speakCurrentSelectionIfSupportedLanguage();
   }
 });
 
