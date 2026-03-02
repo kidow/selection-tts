@@ -37,7 +37,14 @@
         "content/shared.js",
         "content/voiceProfiles.js",
         "content/speaker.js",
-        "content/language.js",
+        "content/language/detect.js",
+        "content/language/rules/fr.js",
+        "content/language/rules/de.js",
+        "content/language/rules/es.js",
+        "content/language/rules/ar.js",
+        "content/language/rules/ru.js",
+        "content/language/rules/pt.js",
+        "content/language/pickTargetLanguage.js",
         "content.js"
       ]
     }
