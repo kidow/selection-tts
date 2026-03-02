@@ -33,7 +33,13 @@
   "content_scripts": [
     {
       "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
-      "js": ["content.js"]
+      "js": [
+        "content/shared.js",
+        "content/voiceProfiles.js",
+        "content/speaker.js",
+        "content/language.js",
+        "content.js"
+      ]
     }
   ]
 }
