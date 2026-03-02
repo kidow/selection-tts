@@ -165,6 +165,10 @@ function looksLikeFrenchText(text) {
     score += 1;
   }
 
+  if (tokens.length <= 2) {
+    return score >= 1;
+  }
+
   return score >= 2;
 }
 
@@ -188,7 +192,14 @@ function pickTargetLanguage(text, detectedLanguages) {
     item.language.startsWith("fr")
   );
   const isLikelyFrench = looksLikeFrenchText(text);
-  if (isLikelyFrench && (!frenchCandidate || frenchCandidate.percentage >= 10)) {
+  if (
+    frenchCandidate &&
+    (frenchCandidate.percentage >= 5 || isLikelyFrench)
+  ) {
+    return mappedLanguageCodes.fr;
+  }
+
+  if (isLikelyFrench && !frenchCandidate) {
     return mappedLanguageCodes.fr;
   }
 
