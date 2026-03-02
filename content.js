@@ -317,6 +317,69 @@ function looksLikeSpanishText(text) {
   return score >= 2;
 }
 
+function looksLikeArabicText(text) {
+  const normalized = text
+    .toLowerCase()
+    .replace(/[\u064b-\u065f\u0670]/g, "")
+    .replace(/ـ/g, "")
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[^\u0600-\u06ff\s]/g, " ");
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  if (!tokens.length) {
+    return false;
+  }
+
+  const hasArabicScript = /[\u0600-\u06ff]/.test(normalized);
+  if (!hasArabicScript) {
+    return false;
+  }
+
+  if (
+    /\bمرحبا\b/.test(normalized) ||
+    /\bشكرا\b/.test(normalized) ||
+    /\bكيف\s+حالك\b/.test(normalized) ||
+    /\bاسمي\b/.test(normalized) ||
+    /\bلا\s+افهم\b/.test(normalized)
+  ) {
+    return true;
+  }
+
+  const arabicWords = new Set([
+    "مرحبا",
+    "شكرا",
+    "كيف",
+    "حالك",
+    "اسمي",
+    "لا",
+    "افهم",
+    "من",
+    "في",
+    "انا",
+    "انت",
+    "هذا",
+    "هذه",
+    "نعم",
+    "ليس",
+    "مع",
+    "الى",
+  ]);
+
+  let score = 0;
+  for (const token of tokens) {
+    if (arabicWords.has(token)) {
+      score += 1;
+    }
+  }
+
+  if (tokens.length <= 2) {
+    return score >= 1;
+  }
+
+  return score >= 2;
+}
+
 function pickTargetLanguage(text, detectedLanguages) {
   const supportedOrder = ["en", "ja", "zh", "fr", "de", "es", "ar"];
   const mappedLanguageCodes = {
@@ -348,6 +411,10 @@ function pickTargetLanguage(text, detectedLanguages) {
     item.language.startsWith("es")
   );
   const isLikelySpanish = looksLikeSpanishText(text);
+  const arabicCandidate = normalizedCandidates.find((item) =>
+    item.language.startsWith("ar")
+  );
+  const isLikelyArabic = looksLikeArabicText(text);
 
   if (
     frenchCandidate &&
@@ -382,6 +449,17 @@ function pickTargetLanguage(text, detectedLanguages) {
     return mappedLanguageCodes.es;
   }
 
+  if (
+    arabicCandidate &&
+    (arabicCandidate.percentage >= 5 || isLikelyArabic)
+  ) {
+    return mappedLanguageCodes.ar;
+  }
+
+  if (isLikelyArabic && !arabicCandidate) {
+    return mappedLanguageCodes.ar;
+  }
+
   for (const candidate of normalizedCandidates) {
     for (const supported of supportedOrder) {
       if (candidate.language.startsWith(supported)) {
@@ -400,6 +478,10 @@ function pickTargetLanguage(text, detectedLanguages) {
 
   if (isLikelySpanish) {
     return mappedLanguageCodes.es;
+  }
+
+  if (isLikelyArabic) {
+    return mappedLanguageCodes.ar;
   }
 
   return null;
