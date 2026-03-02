@@ -18,6 +18,12 @@ const PREFERRED_VOICE_NAMES_BY_LANGUAGE = {
     "Sin-ji",
     "Microsoft Xiaoxiao Online (Natural) - Chinese (Mainland)",
   ],
+  fr: [
+    "Google français",
+    "Thomas",
+    "Amelie",
+    "Microsoft Denise Online (Natural) - French (France)",
+  ],
 };
 
 function pickVoice(voices, language) {
@@ -97,23 +103,108 @@ async function speak(text, language = "en-US") {
   window.speechSynthesis.speak(utterance);
 }
 
-function detectLanguage(text) {
+function detectLanguages(text) {
   return new Promise((resolve) => {
     if (!chrome?.i18n?.detectLanguage) {
-      resolve(null);
+      resolve([]);
       return;
     }
 
     chrome.i18n.detectLanguage(text, (result) => {
       if (chrome.runtime.lastError || !result) {
-        resolve(null);
+        resolve([]);
         return;
       }
 
-      const [topLanguage] = result.languages || [];
-      resolve(topLanguage?.language || null);
+      resolve(result.languages || []);
     });
   });
+}
+
+function looksLikeFrenchText(text) {
+  const normalized = text.toLowerCase().replace(/[^a-z'\s]/g, " ");
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  if (!tokens.length) {
+    return false;
+  }
+
+  const frenchWords = new Set([
+    "le",
+    "la",
+    "les",
+    "de",
+    "des",
+    "du",
+    "un",
+    "une",
+    "et",
+    "est",
+    "que",
+    "qui",
+    "dans",
+    "pour",
+    "avec",
+    "pas",
+    "plus",
+    "nous",
+    "vous",
+    "ils",
+    "elles",
+    "bonjour",
+    "merci",
+  ]);
+
+  let score = 0;
+  for (const token of tokens) {
+    if (frenchWords.has(token)) {
+      score += 1;
+    }
+  }
+
+  if (/\b[cdjlmnstq]'[a-z]+/.test(normalized)) {
+    score += 1;
+  }
+
+  return score >= 2;
+}
+
+function pickTargetLanguage(text, detectedLanguages) {
+  const supportedOrder = ["en", "ja", "zh", "fr"];
+  const mappedLanguageCodes = {
+    en: "en-US",
+    ja: "ja-JP",
+    zh: "zh-CN",
+    fr: "fr-FR",
+  };
+
+  const normalizedCandidates = (detectedLanguages || [])
+    .map((item) => ({
+      language: (item?.language || "").toLowerCase(),
+      percentage: typeof item?.percentage === "number" ? item.percentage : 0,
+    }))
+    .filter((item) => item.language.length > 0);
+
+  const frenchCandidate = normalizedCandidates.find((item) =>
+    item.language.startsWith("fr")
+  );
+  const isLikelyFrench = looksLikeFrenchText(text);
+  if (isLikelyFrench && (!frenchCandidate || frenchCandidate.percentage >= 10)) {
+    return mappedLanguageCodes.fr;
+  }
+
+  for (const candidate of normalizedCandidates) {
+    for (const supported of supportedOrder) {
+      if (candidate.language.startsWith(supported)) {
+        return mappedLanguageCodes[supported];
+      }
+    }
+  }
+
+  if (isLikelyFrench) {
+    return mappedLanguageCodes.fr;
+  }
+
+  return null;
 }
 
 async function speakCurrentSelectionIfSupportedLanguage() {
@@ -122,25 +213,10 @@ async function speakCurrentSelectionIfSupportedLanguage() {
     return;
   }
 
-  const language = await detectLanguage(selectedText);
-  if (!language) {
+  const detectedLanguages = await detectLanguages(selectedText);
+  const targetLanguage = pickTargetLanguage(selectedText, detectedLanguages);
+  if (!targetLanguage) {
     return;
-  }
-
-  const normalizedLanguage = language.toLowerCase();
-  if (
-    !normalizedLanguage.startsWith("en") &&
-    !normalizedLanguage.startsWith("ja") &&
-    !normalizedLanguage.startsWith("zh")
-  ) {
-    return;
-  }
-
-  let targetLanguage = "en-US";
-  if (normalizedLanguage.startsWith("ja")) {
-    targetLanguage = "ja-JP";
-  } else if (normalizedLanguage.startsWith("zh")) {
-    targetLanguage = "zh-CN";
   }
 
   await speak(selectedText, targetLanguage);
