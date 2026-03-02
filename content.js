@@ -11,6 +11,13 @@ const PREFERRED_VOICE_NAMES_BY_LANGUAGE = {
     "Otoya",
     "Microsoft Nanami Online (Natural) - Japanese (Japan)",
   ],
+  zh: [
+    "Google 普通话（中国大陆）",
+    "Google 國語（臺灣）",
+    "Ting-Ting",
+    "Sin-ji",
+    "Microsoft Xiaoxiao Online (Natural) - Chinese (Mainland)",
+  ],
 };
 
 function pickVoice(voices, language) {
@@ -123,12 +130,20 @@ async function speakCurrentSelectionIfSupportedLanguage() {
   const normalizedLanguage = language.toLowerCase();
   if (
     !normalizedLanguage.startsWith("en") &&
-    !normalizedLanguage.startsWith("ja")
+    !normalizedLanguage.startsWith("ja") &&
+    !normalizedLanguage.startsWith("zh")
   ) {
     return;
   }
 
-  await speak(selectedText, normalizedLanguage.startsWith("ja") ? "ja-JP" : "en-US");
+  let targetLanguage = "en-US";
+  if (normalizedLanguage.startsWith("ja")) {
+    targetLanguage = "ja-JP";
+  } else if (normalizedLanguage.startsWith("zh")) {
+    targetLanguage = "zh-CN";
+  }
+
+  await speak(selectedText, targetLanguage);
 }
 
 function isEditableTarget(target) {
