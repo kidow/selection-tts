@@ -1,50 +1,50 @@
-# Selection TTS (English First) — Chrome Extension Implementation Plan
+# Selection TTS (영어 우선) — Chrome Extension 구현 계획
 
-## 1. Project Overview
+## 1. 프로젝트 개요
 
-**Goal**
-Create a Chrome Extension (Manifest V3) that:
+**목표**
+다음 기능을 제공하는 Chrome Extension(Manifest V3)을 만든다.
 
-- Allows users to select text on a page (initial target: ChatGPT page)
-- Right-click → "Speak selection"
-- Plays the selected text in English (en-US) using Web Speech API
-- Free (no external API, no backend)
+- 웹페이지에서 텍스트를 선택할 수 있어야 한다(초기 대상: ChatGPT 페이지)
+- 우클릭 메뉴에서 `Speak selection`을 실행할 수 있어야 한다
+- 선택한 텍스트를 Web Speech API로 영어(`en-US`) 음성 재생해야 한다
+- 무료로 동작해야 하며(외부 API, 백엔드 없음) 로컬 브라우저 기능만 사용한다
 
-**Version Strategy**
+**버전 전략**
 
-- v0.1.0 → English only
-- v0.2.0 → Multi-language submenu
-- v0.3.0 → Language preference persistence
-- v0.4.0 → Rate / pitch control
+- `v0.1.0`: 영어 단일 지원
+- `v0.2.0`: 다국어 서브메뉴 추가
+- `v0.3.0`: 언어 설정 저장
+- `v0.4.0`: 속도(rate) / 피치(pitch) 제어
 
 ---
 
-## 2. Technical Architecture
+## 2. 기술 아키텍처
 
-### Core Stack
+### 핵심 스택
 
 - Chrome Extension (Manifest V3)
 - Context Menu API
 - Content Script
 - Web Speech API (`speechSynthesis`)
-- No server
-- No external dependency
+- 서버 없음
+- 외부 의존성 없음
 
-### Runtime Flow
+### 런타임 동작 흐름
 
-1. User selects text
-2. User right-clicks
-3. Clicks "Speak selection"
-4. Background service worker receives event
-5. Background sends message to active tab
-6. Content script executes TTS
-7. Speech plays in English
+1. 사용자가 텍스트를 선택한다
+2. 사용자가 마우스 우클릭을 한다
+3. `Speak selection` 메뉴를 클릭한다
+4. Background Service Worker가 클릭 이벤트를 받는다
+5. Background가 활성 탭의 Content Script에 메시지를 보낸다
+6. Content Script가 TTS를 실행한다
+7. 영어 음성이 재생된다
 
 ---
 
-## 3. Directory Structure
+## 3. 디렉터리 구조
 
-```
+```text
 selection-tts/
 │
 ├── manifest.json
@@ -57,7 +57,7 @@ selection-tts/
 
 ---
 
-## 4. Manifest Configuration (MV3)
+## 4. Manifest 설정 (MV3)
 
 ### manifest.json
 
@@ -83,15 +83,15 @@ selection-tts/
 
 ---
 
-## 5. Context Menu Setup
+## 5. 컨텍스트 메뉴 구성
 
 ### background.js
 
-Responsibilities:
+역할:
 
-- Create context menu on install
-- Listen for click events
-- Send selected text to content script
+- 확장 프로그램 설치 시 우클릭 메뉴 생성
+- 메뉴 클릭 이벤트 수신
+- 선택 텍스트를 Content Script로 전달
 
 ```js
 chrome.runtime.onInstalled.addListener(() => {
@@ -115,15 +115,15 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
 ---
 
-## 6. Text-to-Speech Execution
+## 6. TTS 실행 로직
 
 ### content.js
 
-Responsibilities:
+역할:
 
-- Receive message
-- Cancel previous speech
-- Play new utterance in English
+- Background 메시지 수신
+- 기존 재생 중 음성 취소
+- 새 영어 발화 재생
 
 ```js
 function speak(text) {
@@ -148,116 +148,116 @@ chrome.runtime.onMessage.addListener((message) => {
 
 ---
 
-## 7. Browser Voice Dependency (Important)
+## 7. 브라우저 음성 의존성 (중요)
 
-Web Speech API relies on:
+Web Speech API는 아래 요소에 의존한다.
 
-- OS-installed voices
-- Browser voice availability
+- OS에 설치된 음성(voice)
+- 브라우저에서 사용 가능한 음성 목록
 
-Potential behavior:
+예상 동작:
 
-- If en-US voice exists → native English voice
-- If not → fallback voice
+- `en-US` 음성이 있으면 해당 음성으로 재생
+- 없으면 브라우저/OS 기본 fallback 음성으로 재생
 
-For stricter control (future version):
+향후 버전에서 음성을 더 엄격하게 고정하려면:
 
+```js
+speechSynthesis.getVoices();
 ```
-speechSynthesis.getVoices()
-```
 
-Select voice manually by matching:
+아래 조건으로 직접 선택한다:
 
-```
-voice.lang === "en-US"
+```js
+voice.lang === "en-US";
 ```
 
 ---
 
-## 8. Testing Plan
+## 8. 테스트 계획
 
-### Local Development
+### 로컬 개발 테스트
 
-1. Go to: chrome://extensions
-2. Enable Developer Mode
-3. Click "Load unpacked"
-4. Select project folder
-5. Open https://chatgpt.com
-6. Select text
-7. Right-click → Speak selection
+1. `chrome://extensions`로 이동
+2. Developer Mode 활성화
+3. `Load unpacked` 클릭
+4. 프로젝트 폴더 선택
+5. `https://chatgpt.com` 열기
+6. 텍스트 선택
+7. 우클릭 후 `Speak selection` 실행
 
-### Edge Case Tests
+### 엣지 케이스 테스트
 
-- Long paragraphs
-- Multiple rapid clicks
-- Selecting empty string
-- Switching tabs mid-speech
-
----
-
-## 9. Known Constraints
-
-- TTS quality depends on user OS
-- Cannot guarantee identical pronunciation across systems
-- CSP on some sites may require host permission adjustments
-- Web Speech API may behave slightly differently across browsers
+- 긴 문단 선택 후 재생
+- 매우 빠른 연속 클릭
+- 빈 문자열(실질적으로 선택 없음)
+- 재생 중 탭 전환
 
 ---
 
-## 10. Future Roadmap
+## 9. 알려진 제약사항
 
-### v0.2.0 — Multi-language Support
-
-- Add submenu
-- Add language mapping:
-  - en-US
-  - de-DE
-  - ja-JP
-  - fr-FR
-
-### v0.3.0 — Language Preference
-
-- chrome.storage.sync
-- Default language setting
-
-### v0.4.0 — Controls
-
-- Rate control
-- Pitch control
-- Repeat mode
-- Sentence splitting by punctuation
+- TTS 품질은 사용자 OS 음성 엔진에 좌우된다
+- 시스템마다 발음/억양의 일관성을 보장할 수 없다
+- 일부 사이트 CSP 정책으로 host permission 조정이 필요할 수 있다
+- 브라우저별 Web Speech API 동작이 미세하게 다를 수 있다
 
 ---
 
-## 11. README Skeleton
+## 10. 향후 로드맵
 
-### What it does
+### v0.2.0 — 다국어 지원
 
-Right-click selected text → Speak in English.
+- 서브메뉴 추가
+- 언어 매핑 추가:
+  - `en-US`
+  - `de-DE`
+  - `ja-JP`
+  - `fr-FR`
 
-### Why
+### v0.3.0 — 언어 설정 저장
 
-Lightweight pronunciation learning tool for ChatGPT users.
+- `chrome.storage.sync` 적용
+- 기본 언어 설정 저장
 
-### Permissions
+### v0.4.0 — 재생 제어 기능
+
+- 속도(rate) 조절
+- 피치(pitch) 조절
+- 반복 재생 모드
+- 문장부호 기준 문장 분리 재생
+
+---
+
+## 11. README 기본 구성안
+
+### 무엇을 하는가
+
+선택한 텍스트를 우클릭하면 영어로 읽어준다.
+
+### 왜 필요한가
+
+ChatGPT 사용자에게 가벼운 발음 학습 보조 도구를 제공하기 위함.
+
+### 권한
 
 - contextMenus
 - activeTab
 
-### No Data Collection
+### 데이터 수집 없음
 
-- No tracking
-- No server
-- No analytics
+- 추적 없음
+- 서버 없음
+- 분석 수집 없음
 
 ---
 
-## 12. Versioning Strategy
+## 12. 버전 관리 전략
 
-- 0.x until Chrome Web Store release
-- Semantic versioning
-- Clean commit structure:
-  - feat: context menu TTS
+- Chrome Web Store 출시 전까지 `0.x` 유지
+- 시맨틱 버저닝(Semantic Versioning) 적용
+- 명확한 커밋 구조 유지:
+  - `feat: context menu tts`
   - chore: manifest config
   - refactor: voice selection logic
 
