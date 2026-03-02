@@ -36,6 +36,11 @@ const PREFERRED_VOICE_NAMES_BY_LANGUAGE = {
     "Monica",
     "Microsoft Elvira Online (Natural) - Spanish (Spain)",
   ],
+  ar: [
+    "Google العربية",
+    "Maged",
+    "Microsoft Hamed Online (Natural) - Arabic (Saudi Arabia)",
+  ],
 };
 
 function pickVoice(voices, language) {
@@ -313,7 +318,7 @@ function looksLikeSpanishText(text) {
 }
 
 function pickTargetLanguage(text, detectedLanguages) {
-  const supportedOrder = ["en", "ja", "zh", "fr", "de", "es"];
+  const supportedOrder = ["en", "ja", "zh", "fr", "de", "es", "ar"];
   const mappedLanguageCodes = {
     en: "en-US",
     ja: "ja-JP",
@@ -321,6 +326,7 @@ function pickTargetLanguage(text, detectedLanguages) {
     fr: "fr-FR",
     de: "de-DE",
     es: "es-ES",
+    ar: "ar-SA",
   };
 
   const normalizedCandidates = (detectedLanguages || [])
