@@ -100,13 +100,39 @@ async function speakCurrentSelectionIfEnglish() {
   await speak(selectedText);
 }
 
-chrome.runtime.onMessage.addListener((message) => {
-  if (message?.type === "SPEAK_SELECTION") {
-    void speak(message.text);
+function isEditableTarget(target) {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  const tagName = target.tagName.toLowerCase();
+  return (
+    target.isContentEditable ||
+    tagName === "input" ||
+    tagName === "textarea" ||
+    tagName === "select"
+  );
+}
+
+function onShortcutKeydown(event) {
+  const isMacShortcut = event.metaKey && !event.ctrlKey && !event.altKey;
+  const isShortcutKey = event.key.toLowerCase() === "i";
+  if (!isMacShortcut || !isShortcutKey) {
     return;
   }
 
+  if (isEditableTarget(event.target)) {
+    return;
+  }
+
+  event.preventDefault();
+  void speakCurrentSelectionIfEnglish();
+}
+
+chrome.runtime.onMessage.addListener((message) => {
   if (message?.type === "SPEAK_CURRENT_SELECTION_IF_ENGLISH") {
     void speakCurrentSelectionIfEnglish();
   }
 });
+
+window.addEventListener("keydown", onShortcutKeydown, true);
