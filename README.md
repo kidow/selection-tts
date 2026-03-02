@@ -47,11 +47,14 @@
 ```text
 selection-tts/
 │
+├── icon.png                 # 임시 원본 아이콘(사용자 제공)
+├── icons/
+│   ├── icon16.png
+│   ├── icon48.png
+│   └── icon128.png
 ├── manifest.json
 ├── background.js
 ├── content.js
-├── icons/
-│   └── icon128.png
 └── README.md
 ```
 
@@ -69,6 +72,19 @@ selection-tts/
   "description": "Speak selected text in English via context menu.",
   "permissions": ["contextMenus", "activeTab"],
   "host_permissions": ["https://chatgpt.com/*"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Selection TTS",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
   "background": {
     "service_worker": "background.js"
   },
@@ -79,6 +95,24 @@ selection-tts/
     }
   ]
 }
+```
+
+### icon.png 사용 방법 (임시 아이콘 적용)
+
+현재 루트에 있는 `icon.png`를 원본으로 두고, 확장 프로그램에서 요구하는 크기별 아이콘을 생성해 사용한다.
+
+1. `icons` 디렉터리를 만든다.
+2. `icon.png`를 `16x16`, `48x48`, `128x128`으로 리사이즈해 `icons/`에 저장한다.
+3. 위 `manifest.json`의 `icons` 및 `action.default_icon` 경로를 그대로 사용한다.
+4. `chrome://extensions`에서 확장 프로그램을 새로고침해 아이콘 적용 여부를 확인한다.
+
+macOS 예시 명령어:
+
+```bash
+mkdir -p icons
+sips -z 16 16 icon.png --out icons/icon16.png
+sips -z 48 48 icon.png --out icons/icon48.png
+sips -z 128 128 icon.png --out icons/icon128.png
 ```
 
 ---
