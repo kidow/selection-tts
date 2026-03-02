@@ -30,6 +30,12 @@ const PREFERRED_VOICE_NAMES_BY_LANGUAGE = {
     "Markus",
     "Microsoft Katja Online (Natural) - German (Germany)",
   ],
+  es: [
+    "Google español",
+    "Jorge",
+    "Monica",
+    "Microsoft Elvira Online (Natural) - Spanish (Spain)",
+  ],
 };
 
 function pickVoice(voices, language) {
@@ -236,13 +242,14 @@ function looksLikeGermanText(text) {
 }
 
 function pickTargetLanguage(text, detectedLanguages) {
-  const supportedOrder = ["en", "ja", "zh", "fr", "de"];
+  const supportedOrder = ["en", "ja", "zh", "fr", "de", "es"];
   const mappedLanguageCodes = {
     en: "en-US",
     ja: "ja-JP",
     zh: "zh-CN",
     fr: "fr-FR",
     de: "de-DE",
+    es: "es-ES",
   };
 
   const normalizedCandidates = (detectedLanguages || [])
