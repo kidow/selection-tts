@@ -41,6 +41,11 @@ const PREFERRED_VOICE_NAMES_BY_LANGUAGE = {
     "Maged",
     "Microsoft Hamed Online (Natural) - Arabic (Saudi Arabia)",
   ],
+  ru: [
+    "Google русский",
+    "Milena",
+    "Microsoft Svetlana Online (Natural) - Russian (Russia)",
+  ],
 };
 
 function pickVoice(voices, language) {
@@ -381,7 +386,7 @@ function looksLikeArabicText(text) {
 }
 
 function pickTargetLanguage(text, detectedLanguages) {
-  const supportedOrder = ["en", "ja", "zh", "fr", "de", "es", "ar"];
+  const supportedOrder = ["en", "ja", "zh", "fr", "de", "es", "ar", "ru"];
   const mappedLanguageCodes = {
     en: "en-US",
     ja: "ja-JP",
@@ -390,6 +395,7 @@ function pickTargetLanguage(text, detectedLanguages) {
     de: "de-DE",
     es: "es-ES",
     ar: "ar-SA",
+    ru: "ru-RU",
   };
 
   const normalizedCandidates = (detectedLanguages || [])
