@@ -67,8 +67,46 @@ async function speak(text) {
   window.speechSynthesis.speak(utterance);
 }
 
+function detectLanguage(text) {
+  return new Promise((resolve) => {
+    if (!chrome?.i18n?.detectLanguage) {
+      resolve(null);
+      return;
+    }
+
+    chrome.i18n.detectLanguage(text, (result) => {
+      if (chrome.runtime.lastError || !result) {
+        resolve(null);
+        return;
+      }
+
+      const [topLanguage] = result.languages || [];
+      resolve(topLanguage?.language || null);
+    });
+  });
+}
+
+async function speakCurrentSelectionIfEnglish() {
+  const selectedText = window.getSelection()?.toString()?.trim();
+  if (!selectedText) {
+    return;
+  }
+
+  const language = await detectLanguage(selectedText);
+  if (!language || !language.startsWith("en")) {
+    return;
+  }
+
+  await speak(selectedText);
+}
+
 chrome.runtime.onMessage.addListener((message) => {
   if (message?.type === "SPEAK_SELECTION") {
     void speak(message.text);
+    return;
+  }
+
+  if (message?.type === "SPEAK_CURRENT_SELECTION_IF_ENGLISH") {
+    void speakCurrentSelectionIfEnglish();
   }
 });
