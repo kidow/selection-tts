@@ -37,6 +37,7 @@
         "content/shared.js",
         "content/voiceProfiles.js",
         "content/speaker.js",
+        "content/toast.js",
         "content/language/detect.js",
         "content/language/rules/fr.js",
         "content/language/rules/de.js",

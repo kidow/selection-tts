@@ -32,6 +32,9 @@ window.SelectionTTS = window.SelectionTTS || {};
       return;
     }
 
+    const languageLabel = namespace.getLanguageLabelKo(targetLanguage);
+    namespace.showToast(`발음 언어: ${languageLabel}`);
+
     await namespace.speak(selectedText, targetLanguage);
   }
 

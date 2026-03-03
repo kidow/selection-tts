@@ -80,3 +80,26 @@ window.SelectionTTS.MAPPED_LANGUAGE_CODES = {
   ru: "ru-RU",
   pt: "pt-PT",
 };
+
+window.SelectionTTS.LANGUAGE_LABELS_KO = {
+  "en-US": "영어",
+  "ja-JP": "일본어",
+  "zh-CN": "중국어",
+  "fr-FR": "프랑스어",
+  "de-DE": "독일어",
+  "es-ES": "스페인어",
+  "ar-SA": "아랍어",
+  "ru-RU": "러시아어",
+  "pt-PT": "포르투갈어",
+};
+
+window.SelectionTTS.getLanguageLabelKo = function getLanguageLabelKo(languageCode) {
+  if (!languageCode) {
+    return "언어(알 수 없음)";
+  }
+
+  return (
+    window.SelectionTTS.LANGUAGE_LABELS_KO[languageCode] ||
+    `언어(${languageCode})`
+  );
+};
