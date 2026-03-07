@@ -24,7 +24,7 @@
   "commands": {
     "speak-selected-if-english": {
       "suggested_key": {
-        "default": "Ctrl+I",
+        "default": "Ctrl+X",
         "mac": "Command+I"
       },
       "description": "Detect selected text language and speak if it is English, Japanese, Chinese, French, German, Spanish, Arabic, Russian, or Portuguese"
