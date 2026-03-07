@@ -3,15 +3,16 @@
 Selection TTS is a Manifest V3 Chrome extension that reads selected text aloud on ChatGPT pages.
 
 The extension is keyboard-first:
+
 - Select text on the page
-- Press `Command+I` (macOS) or `Ctrl+I` (Windows/Linux)
+- Press `Command+X` (macOS) or `Ctrl+X` (Windows/Linux)
 - The extension detects the language and plays speech with Web Speech API
 
 No backend, no external TTS API, and no tracking.
 
 ## Features
 
-- Keyboard shortcut trigger (`Cmd+I` / `Ctrl+I`)
+- Keyboard shortcut trigger (`Cmd+X` / `Ctrl+X`)
 - Automatic language detection via `chrome.i18n.detectLanguage`
 - Language-specific voice preference and fallback selection
 - Heuristic fallback for short phrases in supported languages
@@ -60,7 +61,7 @@ selection-tts/
 ## How It Works
 
 1. User selects text in ChatGPT.
-2. User presses `Cmd+I` / `Ctrl+I`.
+2. User presses `Cmd+X` / `Ctrl+X`.
 3. Content script reads selection and calls `detectLanguage`.
 4. Language picker combines:
    - detected language candidates
@@ -73,8 +74,8 @@ selection-tts/
 2. Enable **Developer mode**
 3. Click **Load unpacked**
 4. Select this project directory
-5. Open `https://chatgpt.com` (or `https://chat.openai.com`)
-6. Select text and press `Cmd+I` / `Ctrl+I`
+5. Open `https://chatgpt.com`
+6. Select text and press `Cmd+X` / `Ctrl+X`
 
 ## Development Notes
 
