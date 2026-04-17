@@ -1,6 +1,6 @@
 # Selection TTS
 
-Selection TTS is a Manifest V3 Chrome extension that reads selected text aloud on ChatGPT pages.
+Selection TTS is a Manifest V3 Chrome extension that reads selected text aloud on ChatGPT and Gemini pages.
 
 The extension is keyboard-first:
 
@@ -74,7 +74,7 @@ selection-tts/
 2. Enable **Developer mode**
 3. Click **Load unpacked**
 4. Select this project directory
-5. Open `https://chatgpt.com`
+5. Open `https://chatgpt.com` or `https://gemini.google.com/app`
 6. Select text and press `Cmd+X` / `Ctrl+X`
 
 ## Development Notes
