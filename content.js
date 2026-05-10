@@ -17,6 +17,15 @@ window.SelectionTTS = window.SelectionTTS || {};
     );
   }
 
+  function isTextInputTarget(target) {
+    if (!(target instanceof HTMLElement)) {
+      return false;
+    }
+
+    const tagName = target.tagName.toLowerCase();
+    return tagName === "input" || tagName === "textarea";
+  }
+
   async function speakCurrentSelectionIfSupportedLanguage() {
     const selectedText = window.getSelection()?.toString()?.trim();
     if (!selectedText) {
@@ -40,8 +49,12 @@ window.SelectionTTS = window.SelectionTTS || {};
 
   function onShortcutKeydown(event) {
     const isMacShortcut = event.metaKey && !event.ctrlKey && !event.altKey;
-    const isShortcutKey = event.key.toLowerCase() === "i";
+    const isShortcutKey = event.key.toLowerCase() === "x";
     if (!isMacShortcut || !isShortcutKey) {
+      return;
+    }
+
+    if (isTextInputTarget(event.target)) {
       return;
     }
 
